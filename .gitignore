@@ -1,0 +1,8 @@
+# Node dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# OS-specific files
+.DS_Store

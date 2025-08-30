@@ -1,0 +1,11 @@
+{
+  "name": "contact-form-netlify",
+  "version": "1.0.0",
+  "description": "Simple contact form using Netlify Functions and Nodemailer",
+  "main": "netlify/functions/contact.js",
+  "license": "MIT",
+  "dependencies": {
+    "nodemailer": "^6.9.4",
+    "xss": "^1.0.14"
+  }
+}

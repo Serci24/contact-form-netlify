@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact Us</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    /* Basic accessible default style (used if style.css is missing) */
+    :root { --bg:#0b0b0c; --card:#15161a; --text:#eaeaea; --muted:#b3b3b3; --accent:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 640px; padding: 24px; margin: 40px auto; }
+    .card { background: var(--card); border: 1px solid #22252b; border-radius: 16px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    h1 { margin: 0 0 12px; font-size: 28px; }
+    p.helper { color: var(--muted); margin-top: 0; }
+    form { display: grid; gap: 14px; margin-top: 12px; }
+    label { font-weight: 600; }
+    input, textarea { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #2a2d34; background:#0e0f12; color: var(--text); }
+    input:focus, textarea:focus { outline: 2px solid #2a8650; border-color: #2a8650; }
+    .row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+    .row > div { display: flex; flex-direction: column; gap: 6px; }
+    textarea { min-height: 140px; resize: vertical; }
+    .hidden-hp { position: absolute; left: -9999px; top: -9999px; }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    button { background: var(--accent); color: #08110a; border: none; padding: 12px 16px; font-weight: 700; border-radius: 10px; cursor: pointer; }
+    .msg { font-size: 14px; }
+    .msg.ok { color: #86efac; }
+    .msg.err { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" aria-labelledby="contactTitle">
+      <h1 id="contactTitle">Contact Us</h1>
+      <p class="helper">Fill out the form below and we’ll get back to you shortly.</p>
+
+      <!-- Progressive enhancement: if JS disabled, the form still submits normally -->
+      <form id="contact-form" action="/api/contact" method="POST" novalidate>
+        <!-- Honeypot (for bots) -->
+        <input type="text" name="company" class="hidden-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+        <div class="row">
+          <div>
+            <label for="name">Name *</label>
+            <input id="name" name="name" type="text" required autocomplete="name" placeholder="John Doe" maxlength="200" />
+          </div>
+
+          <div>
+            <label for="email">Email *</label>
+            <input id="email" name="email" type="email" required autocomplete="email" placeholder="john@example.com" maxlength="200" />
+          </div>
+        </div>
+
+        <div>
+          <label for="phone">Phone *</label>
+          <input id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="+90 5xx xxx xx xx" pattern="[0-9\\-\\+\\(\\)\\s]{7,20}" maxlength="20" />
+        </div>
+
+        <div>
+          <label for="message">Message *</label>
+          <textarea id="message" name="message" required placeholder="How can we help?" maxlength="5000"></textarea>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Send Message</button>
+          <span id="form-msg" class="msg" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('contact-form');
+    const statusEl = document.getElementById('form-msg');
+
+    function showMsg(text, ok = true) {
+      statusEl.textContent = text;
+      statusEl.className = 'msg ' + (ok ? 'ok' : 'err');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      if (!form.checkValidity()) return;
+
+      e.preventDefault();
+      showMsg('Sending...', true);
+
+      const fd = new FormData(form);
+      const payload = Object.fromEntries(fd.entries());
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          showMsg('Thanks! Your message has been sent.', true);
+          form.reset();
+        } else {
+          showMsg(data.message || 'Something went wrong.', false);
+        }
+      } catch (err) {
+        showMsg('Network error. Please try again.', false);
+      }
+    });
+  </script>
+</body>
+</html>
